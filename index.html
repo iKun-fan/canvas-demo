@@ -13,38 +13,61 @@
     <canvas id="canvas"></canvas>
     <script>
         let canvas = document.getElementById('canvas')
-
         canvas.width = document.documentElement.clientWidth
         canvas.height = document.documentElement.clientHeight
-
         let ctx = canvas.getContext('2d')
+        ctx.fillStyle = 'black'
+        ctx.strokeStyle = 'black'
+        ctx.lineWidth = 8
+        ctx.lineCap = 'round'
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+        }
 
         let painting = false
+        let last
 
-        ctx.fillStyle = 'blackf'
-        ctx.strokeStyle = 'none'
-
-        canvas.onmousedown = () => {
-            painting = true
-        }
-
-        canvas.onmousemove = (e) => {
-            // console.log(e.clientX)
-            // console.log(e.clientY)
-            if (painting === true) {
-                // ctx.fillRect(e.clientX - 5, e.clientY - 5, 10, 10)    画方形
-                ctx.beginPath()
-                ctx.arc(e.clientX, e.clientY, 10, 0, 2 * Math.PI)
-                ctx.stroke()
-                ctx.fill()
+        let isTouchDevice = 'ontouchstart' in document.documentElement
+        if (isTouchDevice) {
+            // console.log('isTouchDevice')
+            canvas.ontouchstart = (e) => {
+                let x = e.touches[0].clientX
+                let y = e.touches[0].clientY
+                last = [x, y]
             }
-            else {
-                console.log('end')
+            canvas.ontouchmove = (e) => {
+                let x = e.touches[0].clientX
+                let y = e.touches[0].clientY
+                // console.log(x, y)
+                drawLine(last[0], last[1], x, y)
+                last = [x, y]
             }
         }
+        else {
+            canvas.onmousedown = (e) => {
+                painting = true
+                last = [e.clientX, e.clientY]
+            }
+            canvas.onmousemove = (e) => {
+                // console.log(e.clientX)
+                // console.log(e.clientY)
+                if (painting === true) {
+                    // ctx.fillRect(e.clientX - 5, e.clientY - 5, 10, 10)    画方形
+                    drawLine(last[0], last[1], e.clientX, e.clientY)
+                    last = [e.clientX, e.clientY]
+                }
+                else {
+                    // console.log('end')
+                }
+            }
 
-        canvas.onmouseup = () => {
-            painting = false
+            canvas.onmouseup = () => {
+                painting = false
+            }
         }
     </script>
 </body>
